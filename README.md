@@ -1,2 +1,2 @@
-# cc9
+# 9cc
 https://www.sigbus.info/compilerbook
