@@ -20,12 +20,19 @@ typedef struct Token
 	char *str;
 }	Token;
 
-Token *token;
+Token 	*token;
+char	*user_input;
 
-void	error(char* fmt, ...)
+void	error_at(char *loc, char* fmt, ...)
 {
 	va_list ap;
+	int		pos;
+
 	va_start(ap, fmt);
+	pos = loc - user_input;
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "^ ");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit (1);
@@ -42,7 +49,7 @@ bool	consume(char op)
 void	expect(char op)
 {
 	if (token->kind != TK_RESERVED || token->str[0] != op)
-		error("Not '%c'", op);
+		error_at(token->str, "Not '%c'", op);
 	token = token->next;
 }
 
@@ -51,7 +58,7 @@ int		expect_number(void)
 	int	val;
 
 	if (token->kind != TK_NUM)
-		error("Not number.");
+		error_at(token->str, "Not a number");
 	val = token->val;
 	token = token->next;
 	return (val);
@@ -98,7 +105,7 @@ Token	*tokenize(char *p)
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
-		error("Cannot tokenize.");
+		error_at(p, "Cannot tokenize");
 	}
 	new_token(TK_EOF, cur, p);
 	return head.next;
@@ -113,6 +120,7 @@ int		main(int argc, char **argv)
 		fprintf(stderr, "One argument is required.\n");
 		return (1);
 	}
+	user_input = argv[1];
 	token = tokenize(argv[1]);
 	printf(".intel_syntax noprefix\n");
 	printf(".global main\n");
