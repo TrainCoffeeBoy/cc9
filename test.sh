@@ -26,5 +26,10 @@ assert 4 '(3+5)/2'
 assert 10 '-3 + 13'
 assert 10 '+3 + (4 + 3)'
 assert 10 '-(3 + 10) + 23'
+assert 1 '(3 + 5) == 8'
+assert 0 '(3 + 5) != 8'
+assert 1 '4 <= 5'
+assert 0 '4 >= 5'
+assert 3 '(5 < 4) + 3 * (2 > 1)'
 
 echo OK
