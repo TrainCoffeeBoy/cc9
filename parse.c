@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+Node	*code[100];
+
 Token	*new_token(TokenKind kind, Token *cur, char *str, int len)
 {
 	Token *tok;
@@ -33,7 +35,7 @@ Token	*tokenize(char *p)
 			p += 2;
 			continue ;
 		}
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>')
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=')
 		{
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue ;
@@ -44,6 +46,11 @@ Token	*tokenize(char *p)
 			q = p;
 			cur->val = strtol(p, &p, 10);
 			cur->len = p - q;
+			continue ;
+		}
+		if ('a' <= *p && *p <= 'z')
+		{
+			cur = new_token(TK_IDENT, cur, p++, 1);
 			continue ;
 		}
 		error_at(p, "Cannot tokenize");
@@ -78,9 +85,16 @@ bool	consume(char* op)
 	if (token->kind != TK_RESERVED ||
 		strlen(op) != token->len ||
 		memcmp(token->str, op, token->len))
-		return false;
+		return (false);
 	token = token->next;
-	return true;
+	return (true);
+}
+
+bool	check_ident(void)
+{
+	if (token->kind != TK_IDENT)
+		return (false);
+	return (true);
 }
 
 void	expect(char *op)
@@ -103,9 +117,43 @@ int		expect_number(void)
 	return (val);
 }
 
+bool	at_eof(void)
+{
+	return (token->kind == TK_EOF);
+}
+
+void	program(void)
+{
+	int i;
+
+	i = 0;
+	while (!(at_eof()))
+		code[i++] = stmt();
+	code[i] = NULL;
+}
+
+Node	*stmt(void)
+{
+	Node *node;
+
+	node = expr();
+	expect(";");
+	return (node);
+}
+
 Node	*expr(void)
 {
-	return (equality());
+	return (assign());
+}
+
+Node	*assign(void)
+{
+	Node *node;
+
+	node = equality();
+	if (consume("="))
+		node = new_node(ND_ASSIGN, node, assign());
+	return (node);
 }
 
 Node	*equality(void)
@@ -187,7 +235,17 @@ Node	*unary(void)
 
 Node	*primary(void)
 {
-	if (consume("("))
+	Node	*node;
+
+	if (check_ident())
+	{
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_LVAR;
+		node->offset = (token->str[0] - 'a' + 1) * 8;
+		token = token->next;
+		return (node);
+	}
+	else if (consume("("))
 	{
 		Node *node = expr();
 		expect(")");

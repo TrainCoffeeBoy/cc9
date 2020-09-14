@@ -6,6 +6,7 @@ Token	*token;
 int		main(int argc, char **argv)
 {
 	Node	*node;
+	int		i;
 
 	if (argc != 2)
 	{
@@ -14,12 +15,21 @@ int		main(int argc, char **argv)
 	}
 	user_input = argv[1];
 	token = tokenize(user_input);
-	node = expr();
+	program();
 	printf(".intel_syntax noprefix\n");
 	printf(".global main \n");
 	printf("main:\n");
-	gen(node);
-	printf("	pop rax\n");
+	printf("	push rbp\n");
+	printf("	mov rbp, rsp\n");
+	printf("	sub rsp, %d\n", 8 * 26);//26 alpabetic haracters
+	i = -1;
+	while (code[++i])
+	{
+		gen(code[i]);
+		printf("	pop rax\n");
+	}
+	printf("	mov rsp, rbp\n");
+	printf("	pop rbp\n");
 	printf("	ret\n");
 	return (0);
 }
