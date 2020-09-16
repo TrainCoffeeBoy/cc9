@@ -25,7 +25,7 @@ int		main(int argc, char **argv)
 	printf("main:\n");
 	printf("	push rbp\n");
 	printf("	mov rbp, rsp\n");
-	// printf("	sub rsp, %d\n", 8 * 26);//26 alpabetic haracters
+	printf("	sub rsp, %d\n", 8 * 26);//26 alpabetic haracters
 	i = -1;
 	while (code[++i])
 	{
