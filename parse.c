@@ -50,7 +50,11 @@ Token	*tokenize(char *p)
 		}
 		if ('a' <= *p && *p <= 'z')
 		{
-			cur = new_token(TK_IDENT, cur, p++, 1);
+			cur = new_token(TK_IDENT, cur, p, 0);
+			q = p;
+			while ('a' <= *p && *p <= 'z')
+				p++;
+			cur->len = p - q;
 			continue ;
 		}
 		error_at(p, "Cannot tokenize");
@@ -233,16 +237,50 @@ Node	*unary(void)
 	return (primary());
 }
 
+Lvar	*find_lvar(void)
+{
+	Lvar *tmp;
+
+	tmp = locals;
+	while (tmp)
+	{
+		if (tmp->len == token->len && !memcmp(tmp->name, token->str, tmp->len))
+			return (tmp);
+		tmp = tmp->next;
+	}
+	return (NULL);
+}
+
 Node	*primary(void)
 {
-	Node	*node;
+	Node *node;
+	Lvar *curr;
+	Lvar *lvar;
 
 	if (check_ident())
 	{
 		node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		node->offset = (token->str[0] - 'a' + 1) * 8;
-		token = token->next;
+		lvar = find_lvar();
+		if (lvar)
+		{
+			node->offset = lvar->offset;
+			token = token->next;
+		}
+		else
+		{
+			curr = locals;
+			while (curr->next)
+				curr = curr->next;
+			lvar = calloc(1, sizeof(Lvar));
+			lvar->next = NULL;
+			lvar->name = token->str;
+			lvar->len = token->len;
+			lvar->offset = curr->offset + 8;
+			node->offset = lvar->offset;
+			curr->next = lvar;
+			token = token->next;
+		}
 		return (node);
 	}
 	else if (consume("("))

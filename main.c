@@ -2,6 +2,7 @@
 
 char	*user_input;
 Token	*token;
+Lvar 	*locals;
 
 int		main(int argc, char **argv)
 {
@@ -15,13 +16,16 @@ int		main(int argc, char **argv)
 	}
 	user_input = argv[1];
 	token = tokenize(user_input);
+	locals = calloc(1, sizeof(Lvar));
+	locals->offset = 0;
+	locals->next = NULL;
 	program();
 	printf(".intel_syntax noprefix\n");
 	printf(".global main \n");
 	printf("main:\n");
 	printf("	push rbp\n");
 	printf("	mov rbp, rsp\n");
-	printf("	sub rsp, %d\n", 8 * 26);//26 alpabetic haracters
+	// printf("	sub rsp, %d\n", 8 * 26);//26 alpabetic haracters
 	i = -1;
 	while (code[++i])
 	{

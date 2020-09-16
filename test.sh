@@ -32,5 +32,6 @@ assert 1 '4 <= 5;'
 assert 0 '4 >= 5;'
 assert 3 '(5 < 4) + 3 * (2 > 1);'
 assert 4 'a = 2; b = 4; a * b - (1 + 3);'
+assert 5 'var = 3; tmp = var * 2; tmp - 1;'
 
 echo OK

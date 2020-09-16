@@ -22,6 +22,14 @@ typedef struct 	Token
 	int			len;
 }				Token;
 
+typedef struct	Lvar
+{
+	struct		Lvar *next;
+	char		*name;
+	int			len;
+	int			offset;
+}				Lvar;
+
 typedef enum
 {
 	ND_ADD,
@@ -51,6 +59,7 @@ typedef struct	Node
 extern char		*user_input;
 extern Token	*token;
 extern Node		*code[100];
+extern Lvar 	*locals;
 
 Token	*tokenize(char *p);
 void	program(void);
@@ -64,5 +73,6 @@ Node	*mul(void);
 Node	*unary(void);
 Node	*primary(void);
 void	gen(Node *node);
+void	init_locals(void);
 void	error_at(char *loc, char* fmt, ...);
 void	error(char *fmt, ...);
